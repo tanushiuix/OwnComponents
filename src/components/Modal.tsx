@@ -1,34 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 
 interface ModalProps {
-  isOpen: boolean;
   onClose: () => void;
   title: string;
   closeButtonContent?: React.ReactNode;
   children: React.ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
-  title,
-  closeButtonContent,
-  children,
-}) => {
-  const [isModalOpen, setIsModalOpen] = useState(isOpen);
+export interface ModalHandle {
+  openModal: () => void;
+  closeModal: () => void;
+}
 
-  useEffect(() => {
-    setIsModalOpen(isOpen);
-  }, [isOpen]);
+const Modal: React.ForwardRefRenderFunction<ModalHandle, ModalProps> = (
+  { onClose, title, closeButtonContent, children },
+  ref
+) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
 
   const closeModal = () => {
-    setIsModalOpen(false);
+    setIsOpen(false);
     onClose();
   };
 
+  useImperativeHandle(ref, () => ({
+    openModal,
+    closeModal,
+  }));
+
   const closeButtonText = closeButtonContent || "×";
 
-  return isModalOpen ? (
+  return isOpen ? (
     <div className="modal">
       <div className="modal-content">
         <span className="close" onClick={closeModal}>
@@ -41,4 +47,4 @@ const Modal: React.FC<ModalProps> = ({
   ) : null;
 };
 
-export default Modal;
+export default forwardRef(Modal);
